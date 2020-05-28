@@ -1,0 +1,162 @@
+"""Watches the system clipboard for youtube urls: GUI version."""
+import os
+import pyperclip
+from pyperclip import waitForNewPaste
+import PySimpleGUIQt as sg
+import queue
+import subprocess
+import threading
+import time
+import sys
+
+from ccaconfig.config import ccaConfig
+
+import ytdlcb
+
+appname = "ytdlcb"
+
+sg.theme("DarkGreen2")
+
+cbstatus = ""
+faileddl = []
+
+
+def notifyQSize(qsize):
+    items = "item" if qsize == 1 else "items"
+    msg = f"{qsize} {items} on download Queue"
+    notify("Clipboard Watcher", msg)
+
+
+def notify(title, message):
+    cmd = ["notify-send", f"{title}", f"{message}"]
+    res = subprocess.run(cmd)
+
+
+def getUrl(cfg, url):
+    global cbstatus, faileddl
+    cbstatus = f"downloading {url}"
+    notify("Clipboard Watcher", cbstatus)
+    os.chdir(cfg["incoming"])
+    cmd = [cfg["youtubedl"], url]
+    res = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    if res.returncode == 0:
+        cbstatus = f"{url} downloaded successfully"
+    else:
+        cbstatus = f"Failed {url}: {res.stederr.decode()}"
+        faileddl.append(url)
+    notify("Clipboard Watcher", cbstatus)
+
+
+def doYouTube(cfg, Q):
+    global cbstatus
+    try:
+        while True:
+            if Q.empty():
+                time.sleep(1)
+            else:
+                iurl = Q.get()
+                if iurl == "STOP":
+                    # print("STOP found")
+                    Q.task_done()
+                    break
+                tmp = iurl.split("&")
+                url = tmp[0]
+                getUrl(cfg, url)
+                Q.task_done()
+        # print("doYoutTube Child is exiting")
+    except Exception as e:
+        cbstatus = f"Exception in doYouTube: {e}"
+        notify("Clipboard Watcher", cbstatus)
+        sys.exit(1)
+
+
+def updateYoutubedl(cfg):
+    layout = [[sg.Text("Checking for an updated youtube-dl")]]
+    win = sg.Window("Please wait ...", layout)
+    win.Finalize()
+    cmd = [cfg["youtubedl"], "-U"]
+    res = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    stderr = res.stderr.decode().strip()
+    stdout = res.stdout.decode().strip()
+    msg = ""
+    if len(stderr) > 0:
+        msg += f" stderr: {stderr}"
+    if len(stdout) > 0:
+        msg += f" {stdout}"
+    win.close()
+    sg.popup_timed(msg, auto_close_duration=10)
+    return msg
+
+
+def watchClipBoard(cfg, Q, ev):
+    global cbstatus
+    cbstatus = f"Watching clipboard: {Q.qsize()} items on Q"
+    thread = threading.Thread(target=doYouTube, args=[cfg, Q])
+    thread.start()
+    while True:
+        try:
+            txt = waitForNewPaste(1)
+        except pyperclip.PyperclipTimeoutException:
+            if ev.is_set():
+                # print("watcher Stop found")
+                # print("putting stop on q")
+                Q.put("STOP")
+                break
+            continue
+        if txt.startswith("https://www.youtube.com/watch"):
+            Q.put(txt)
+            notifyQSize(Q.qsize())
+    # print("waiting for child to exit")
+    thread.join()
+    # print("doYouTube child has exited")
+
+
+def main():
+    global cbstatus, faileddl
+    userd = os.environ.get("HOME", os.path.expanduser("~"))
+    defd = {
+        "incoming": "/".join([userd]),
+        "youtubedl": "/".join([userd, "bin/youtube-dl"]),
+    }
+    cf = ccaConfig(appname=appname, defaultd=defd)
+    cfg = cf.envOverride()
+
+    #### restore this line when building package
+    updateYoutubedl(cfg)
+    #### end of restore this line
+
+    Q = queue.Queue()
+
+    ev = threading.Event()
+    ev.clear()
+    fred = threading.Thread(target=watchClipBoard, name="watcher", args=[cfg, Q, ev])
+    fred.start()
+
+    menu_def = [
+        "BLANK",
+        ["&Status", "---", "E&xit"],
+    ]
+    tray = sg.SystemTray(
+        menu=menu_def,
+        filename=r"images/ytdlcb.png",
+        tooltip="Youtube-dl clipboard watcher",
+    )
+
+    while True:  # The event loop
+        menu_item = tray.read()
+        # print(menu_item)
+        if menu_item == "Exit":
+            # print("Setting stop")
+            ev.set()
+            break
+        elif menu_item == "Status":
+            qsize = f"{Q.qsize()} items on the Queue."
+            sg.popup(qsize, cbstatus)
+    # print("waiting for watcher to stop")
+    fred.join()
+    # print("watcher has stopped")
+    del tray
+
+
+if __name__ == "__main__":
+    main()

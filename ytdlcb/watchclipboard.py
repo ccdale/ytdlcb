@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Watches the system clipboard for youtube urls: GUI version."""
 import os
 import pyperclip
@@ -104,6 +105,9 @@ def watchClipBoard(cfg, Q, ev):
                 break
             continue
         if txt.startswith("https://www.youtube.com/watch"):
+            Q.put(txt)
+            notifyQSize(Q.qsize())
+        elif txt.startswith("https://youtu.be/"):
             Q.put(txt)
             notifyQSize(Q.qsize())
     # print("waiting for child to exit")

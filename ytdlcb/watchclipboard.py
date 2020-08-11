@@ -115,12 +115,36 @@ def watchClipBoard(cfg, Q, ev):
     # print("doYouTube child has exited")
 
 
+def saveQ(Q, fn):
+    qlist = []
+    while not Q.empty():
+        qlist.append(Q.get())
+    with open(fn, "w") as ofp:
+        for cn, line in enumerate(qlist):
+            ofp.write(f"{line}\n")
+    return cn
+
+
+def loadQ(Q, fn):
+    cn = 0
+    if os.path.exists(fn):
+        with open(fn, "r") as ifp:
+            ilines = ifp.readlines()
+            # print(ilines)
+            # sys.exit(0)
+            lines = [line.strip() for line in ilines]
+            for cn, line in enumerate(lines):
+                Q.put(line)
+    return cn
+
+
 def main():
     global cbstatus, faileddl
     userd = os.environ.get("HOME", os.path.expanduser("~"))
     defd = {
         "incoming": "/".join([userd]),
         "youtubedl": "/".join([userd, "bin/youtube-dl"]),
+        "savedqueue": "/".join([userd, ".config/ytdlcb.save"])
     }
     cf = ccaConfig(appname=appname, defaultd=defd)
     cfg = cf.envOverride()
@@ -138,7 +162,7 @@ def main():
 
     menu_def = [
         "BLANK",
-        ["&Status", "---", "E&xit"],
+        ["&Status", "---", "&Load Queue", "Save &Queue", "---", "E&xit"],
     ]
     tray = sg.SystemTray(
         menu=menu_def,
@@ -156,6 +180,16 @@ def main():
         elif menu_item == "Status":
             qsize = f"{Q.qsize()} items on the Queue."
             sg.popup(qsize, cbstatus)
+        elif menu_item == "Load Queue":
+            lqs = loadQ(Q, cfg["savedqueue"])
+            msg = f"{lqs} items loaded onto Queue"
+            sg.popup(msg)
+        elif menu_item == "Save Queue":
+            sqs = saveQ(Q, cfg["savedqueue"])
+            msg = f"{sqs} items saved from Queue"
+            sg.popup(msg, "Quitting now")
+            ev.set()
+            break
     # print("waiting for watcher to stop")
     fred.join()
     # print("watcher has stopped")

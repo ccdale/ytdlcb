@@ -4,6 +4,7 @@ import os
 import pyperclip
 from pyperclip import waitForNewPaste
 import PySimpleGUIQt as sg
+#import PySimpleGUI as sg
 import queue
 import subprocess
 import threading

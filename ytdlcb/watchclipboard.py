@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """Watches the system clipboard for youtube urls: GUI version."""
 import os
-import pyperclip
+import pyperclip  # type: ignore
 from pyperclip import waitForNewPaste
-import PySimpleGUIQt as sg
-#import PySimpleGUI as sg
+import PySimpleGUIQt as sg  # type: ignore
+
+# import PySimpleGUI as sg
 import queue
 import subprocess
 import threading
 import time
 import sys
 
-from ccaconfig.config import ccaConfig
+from ccaconfig.config import ccaConfig  # type: ignore
 
-import ytdlcb
+# import ytdlcb
 
 appname = "ytdlcb"
 
@@ -31,22 +32,26 @@ def notifyQSize(qsize):
 
 def notify(title, message):
     cmd = ["notify-send", f"{title}", f"{message}"]
-    res = subprocess.run(cmd)
+    subprocess.run(cmd)
 
 
 def getUrl(cfg, url):
-    global cbstatus, faileddl
-    cbstatus = f"downloading {url}"
-    notify("Clipboard Watcher", cbstatus)
-    os.chdir(cfg["incoming"])
-    cmd = [cfg["youtubedl"], url]
-    res = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    if res.returncode == 0:
-        cbstatus = f"{url} downloaded successfully"
-    else:
-        cbstatus = f"Failed {url}: {res.stederr.decode()}"
-        faileddl.append(url)
-    notify("Clipboard Watcher", cbstatus)
+    try:
+        global cbstatus, faileddl
+        cbstatus = f"downloading {url}"
+        notify("Clipboard Watcher", cbstatus)
+        os.chdir(cfg["incoming"])
+        cmd = [cfg["youtubedl"], url]
+        res = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        if res.returncode == 0:
+            cbstatus = f"{url} downloaded successfully"
+        else:
+            cbstatus = f"Failed {url}: {res.stederr.decode()}"
+            faileddl.append(url)
+        notify("Clipboard Watcher", cbstatus)
+    except Exception as e:
+        cbstatus = f"Exception: {e}: {res}"
+        notify("Clipboard Watcher Error", cbstatus)
 
 
 def doYouTube(cfg, Q):
@@ -65,6 +70,8 @@ def doYouTube(cfg, Q):
                 url = tmp[0]
                 getUrl(cfg, url)
                 Q.task_done()
+                qsize = f"{Q.qsize()} items on the Queue."
+                notify("Clipboard Watcher", qsize)
         # print("doYoutTube Child is exiting")
     except Exception as e:
         cbstatus = f"Exception in doYouTube: {e}"
@@ -145,14 +152,14 @@ def main():
     defd = {
         "incoming": "/".join([userd]),
         "youtubedl": "/".join([userd, "bin/youtube-dl"]),
-        "savedqueue": "/".join([userd, ".config/ytdlcb.save"])
+        "savedqueue": "/".join([userd, ".config/ytdlcb.save"]),
     }
     cf = ccaConfig(appname=appname, defaultd=defd)
     cfg = cf.envOverride()
 
-    #### restore this line when building package
-    updateYoutubedl(cfg)
-    #### end of restore this line
+    # ### restore this line when building package
+    # updateYoutubedl(cfg)
+    # ### end of restore this line
 
     Q = queue.Queue()
 

@@ -5,3 +5,4 @@ Comment=download youtube videos copied to the clipboard
 Icon=/home/chris/src/ytdlcb/images/ytdlcb.png
 Exec=poetry run ytdlcb/watchclipboard.py
 Path=/home/chris/src/ytdlcb
+Categories=Network

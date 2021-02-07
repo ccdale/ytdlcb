@@ -4,7 +4,8 @@ import os
 import pyperclip
 from pyperclip import waitForNewPaste
 import PySimpleGUIQt as sg
-#import PySimpleGUI as sg
+
+# import PySimpleGUI as sg
 import queue
 import subprocess
 import threading
@@ -145,13 +146,13 @@ def main():
     defd = {
         "incoming": "/".join([userd]),
         "youtubedl": "/".join([userd, "bin/youtube-dl"]),
-        "savedqueue": "/".join([userd, ".config/ytdlcb.save"])
+        "savedqueue": "/".join([userd, ".config/ytdlcb.save"]),
     }
     cf = ccaConfig(appname=appname, defaultd=defd)
     cfg = cf.envOverride()
 
     #### restore this line when building package
-    updateYoutubedl(cfg)
+    # updateYoutubedl(cfg)
     #### end of restore this line
 
     Q = queue.Queue()

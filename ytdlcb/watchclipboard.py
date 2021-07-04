@@ -41,7 +41,7 @@ def getUrl(cfg, url):
         cbstatus = f"downloading {url}"
         notify("Clipboard Watcher", cbstatus)
         os.chdir(cfg["incoming"])
-        cmd = [cfg["youtubedl"], url]
+        cmd = [cfg["youtubedl"], "--cookies", "/home/chris/src/ytdlcb/cookies.txt", url]
         res = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         if res.returncode == 0:
             cbstatus = f"{url} downloaded successfully"
@@ -50,8 +50,10 @@ def getUrl(cfg, url):
             faileddl.append(url)
         notify("Clipboard Watcher", cbstatus)
     except Exception as e:
-        cbstatus = f"Exception: {e}: {res}"
+        cbstatus = f"Exception in getUrl: {e}: {res}"
         notify("Clipboard Watcher Error", cbstatus)
+        with open("failedurls", "a") as ofp:
+            ofp.write(f"{url}\n")
 
 
 def doYouTube(cfg, Q):

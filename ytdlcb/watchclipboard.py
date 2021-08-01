@@ -120,9 +120,9 @@ def watchClipBoard(cfg, Q, ev):
         elif txt.startswith("https://youtu.be/"):
             Q.put(txt)
             notifyQSize(Q.qsize())
-        elif txt.startswith("https://www.itv.com/hub/"):
-            Q.put(txt)
-            notifyQSize(Q.qsize())
+        # elif txt.startswith("https://www.itv.com/hub/"):
+        #     Q.put(txt)
+        #     notifyQSize(Q.qsize())
     # print("waiting for child to exit")
     thread.join()
     # print("doYouTube child has exited")

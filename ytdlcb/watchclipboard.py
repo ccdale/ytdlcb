@@ -120,6 +120,9 @@ def watchClipBoard(cfg, Q, ev):
         elif txt.startswith("https://youtu.be/"):
             Q.put(txt)
             notifyQSize(Q.qsize())
+        elif txt.startswith("https://www.itv.com/hub/"):
+            Q.put(txt)
+            notifyQSize(Q.qsize())
     # print("waiting for child to exit")
     thread.join()
     # print("doYouTube child has exited")
@@ -150,6 +153,7 @@ def loadQ(Q, fn):
 
 def main():
     global cbstatus, faileddl
+    notify("COOKIES", "Don't forget to update /home/chris/src/ytdlcb/cookies.txt")
     userd = os.environ.get("HOME", os.path.expanduser("~"))
     defd = {
         "incoming": "/".join([userd]),

@@ -11,3 +11,5 @@ htmlcov
 coverage.xml
 .mypy*
 checkec2.py
+cookies.txt
+tags

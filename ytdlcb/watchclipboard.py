@@ -5,7 +5,6 @@ import pyperclip  # type: ignore
 from pyperclip import waitForNewPaste
 import PySimpleGUIQt as sg  # type: ignore
 
-# import PySimpleGUI as sg
 import queue
 import subprocess
 import threading

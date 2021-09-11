@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ytdlcb"
-version = "0.2.0"
+version = "0.3.0"
 description = "Watches the clipboard for youtube urls and downloads them: GUI"
 authors = ["Chris Allison <chris.charles.allison+ytdlcb@gmail.com>"]
 license = "GPL-3.0-or-later"

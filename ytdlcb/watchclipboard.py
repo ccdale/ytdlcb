@@ -30,7 +30,13 @@ def notifyQSize(qsize):
 
 
 def notify(title, message):
-    cmd = ["notify-send", f"{title}", f"{message}"]
+    if len(message) > 240:
+        msg = message[:120]
+        msg += " ... "
+        msg += message[len(message) - 120 :]
+    else:
+        msg = message
+    cmd = ["notify-send", f"{title}", f"{msg}"]
     subprocess.run(cmd)
 
 

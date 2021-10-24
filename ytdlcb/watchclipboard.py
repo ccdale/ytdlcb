@@ -14,6 +14,7 @@ import sys
 from ccaconfig.config import ccaConfig  # type: ignore
 
 # import ytdlcb
+from ytdlcb import __version__
 
 appname = "ytdlcb"
 
@@ -160,7 +161,8 @@ def loadQ(Q, fn):
 
 def main():
     global cbstatus, faileddl
-    notify("COOKIES", "Don't forget to update /home/chris/src/ytdlcb/cookies.txt")
+    # notify("COOKIES", "Don't forget to update /home/chris/src/ytdlcb/cookies.txt")
+    notify(f"Watchclipboard {__version__} loaded")
     userd = os.environ.get("HOME", os.path.expanduser("~"))
     defd = {
         "incoming": "/".join([userd]),

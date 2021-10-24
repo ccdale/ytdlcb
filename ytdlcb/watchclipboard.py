@@ -46,8 +46,9 @@ def getUrl(cfg, url):
         cbstatus = f"downloading {url}"
         notify("Clipboard Watcher", cbstatus)
         os.chdir(cfg["incoming"])
+        cmd = [cfg["ytdlp"], "--cookies-from-browser", "firefox", url]
         # cmd = [cfg["youtubedl"], "--cookies", "/home/chris/src/ytdlcb/cookies.txt", url]
-        cmd = [cfg["youtubedl"], url]
+        # cmd = [cfg["youtubedl"], url]
         res = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         if res.returncode == 0:
             cbstatus = f"{url} downloaded successfully"

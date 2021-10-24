@@ -6,3 +6,4 @@ Icon=/home/chris/src/ytdlcb/images/ytdlcb.png
 Exec=poetry run ytdlcb/watchclipboard.py
 Path=/home/chris/src/ytdlcb
 Categories=Network
+X-Desktop-File-Install-Version=0.26

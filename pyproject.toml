@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ytdlcb"
-version = "0.3.4"
+version = "0.3.5"
 description = "Watches the clipboard for youtube urls and downloads them: GUI"
 authors = ["Chris Allison <chris.charles.allison+ytdlcb@gmail.com>"]
 license = "GPL-3.0-or-later"
@@ -8,7 +8,7 @@ readme = "README.md"
 repository = "https://github.com/ccdale/ytdlcb"
 
 [tool.poetry.dependencies]
-python = "~3.9"
+python = ">=3.9,<3.11"
 pyperclip = "^1.8.0"
 ccaconfig = "^0.3.8"
 pysimpleguiqt = "^0.34.0"
